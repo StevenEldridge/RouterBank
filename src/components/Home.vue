@@ -20,19 +20,23 @@
       <v-list-item two-line>
         <v-list-item-content>
           <v-list-item-title>Deposit/Withdraw</v-list-item-title>
-          <v-list-item-subtitle>Allows you to deposit or withdraw money from your checking and savings accounts</v-list-item-subtitle>
+          <v-list-item-subtitle>
+            Allows you to deposit or withdraw {{ currencyName }} from your checking and savings accounts
+          </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
       <v-list-item two-line>
         <v-list-item-content>
           <v-list-item-title>Transfer</v-list-item-title>
-          <v-list-item-subtitle>Allows you to transfer money between accounts</v-list-item-subtitle>
+          <v-list-item-subtitle>Allows you to transfer {{ currencyName }} between accounts</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
       <v-list-item two-line>
         <v-list-item-content>
           <v-list-item-title>Manage Interest</v-list-item-title>
-          <v-list-item-subtitle>Allows you to set up and manage an interest plan for your savings account</v-list-item-subtitle>
+          <v-list-item-subtitle>
+            Allows you to set up and manage an interest plan for your savings account
+          </v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
       <v-list-item two-line>

@@ -1,5 +1,5 @@
 <template>
-  <v-container>
+  <div>
     <h1>Account Overview</h1>
     <h2 class="mt-5">Account Balances</h2>
     <v-row class="mt-1">
@@ -38,12 +38,13 @@
       </v-list-item>
       <v-list-item two-line>
         <v-list-item-content>
-          <v-list-item-title>Currently Making Interest</v-list-item-title>
-          <v-list-item-subtitle> {{ userAccount.mPREnable }}</v-list-item-subtitle>
+          <v-list-item-title>Interest Enabled/Disabled</v-list-item-title>
+          <v-list-item-subtitle v-if="userAccount.mprEnable">Enabled</v-list-item-subtitle>
+          <v-list-item-subtitle v-else>Disabled</v-list-item-subtitle>
         </v-list-item-content>
       </v-list-item>
     </v-list>
-  </v-container>
+  </div>
 </template>
 
 <script lang="ts">

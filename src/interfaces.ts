@@ -6,5 +6,15 @@ export interface userAccount {
     savingsBalance: number,
     checkingBalance: number,
     minutePercentageRate: number,
-    mPREnable: boolean
+    mprEnable: boolean
+}
+
+export interface savingsAndChecking {
+    userID: number,
+    amount: number
+}
+
+export interface mprEnablepayload {
+    userID: number,
+    mprEnable: boolean
 }

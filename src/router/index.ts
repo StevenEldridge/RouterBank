@@ -32,7 +32,7 @@ const routes: Array<RouteConfig> = [
     path: '/user/:userID',
     component: User,
     children: [
-      { path: '', name: 'User Home', component: Home },
+      { path: '', name: 'UserHome', component: Home },
       { path: 'home', name: 'Home', component: Home },
       { path: 'accountoverview', name: 'AccountOverview', component: AccountOverview },
       { path: 'depositwithdraw', name: 'DepositWithdraw', component: DepositWithdraw },

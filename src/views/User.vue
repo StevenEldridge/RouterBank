@@ -39,7 +39,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {userAccount} from '@/interfaces'
+import {savingsAndChecking, userAccount} from '@/interfaces'
 
 interface drawerItem {
   title: string,
@@ -73,7 +73,26 @@ export default Vue.extend({
     userBalance(): number {
       const account: userAccount = this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID))
       return account.checkingBalance + account.savingsBalance
+    },
+    userAccount(): userAccount | null {
+      return this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID))
+    },
+  },
+
+  methods: {
+    calculateMPR(): void {
+      if (this.userAccount != null && this.userAccount.mprEnable) {
+        const userID = Number.parseInt(this.$route.params.userID)
+        const interest = this.userAccount.savingsBalance * this.userAccount.minutePercentageRate / 10
+        this.$store.commit('depositSavings',
+              {userID: userID, amount: (Math.round(interest * 100) / 100)} as savingsAndChecking)
+      }
+      setTimeout(() => this.calculateMPR(), 5000)
     }
+  },
+
+  mounted() {
+    setTimeout(() => this.calculateMPR(), 5000)
   }
 })
 </script>

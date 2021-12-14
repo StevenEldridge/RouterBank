@@ -22,7 +22,7 @@ export default Vue.extend({
       savingsBalance: 100.00,
       checkingBalance: 50.00,
       minutePercentageRate: 0.1,
-      mPREnable: false
+      mprEnable: false
     } as userAccount)
   }
 });
