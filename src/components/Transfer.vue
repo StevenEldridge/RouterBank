@@ -129,8 +129,8 @@ export default Vue.extend ({
           this.messageResult = "Error: Not enough in checking to complete transfer"
         }
         else {
-          this.$store.commit('withdrawChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
-          this.$store.commit('depositSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
+          this.$store.dispatch('withdrawChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
+          this.$store.dispatch('depositSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
           this.messageResult= ""
         }
       }
@@ -140,8 +140,8 @@ export default Vue.extend ({
           this.messageResult = "Error: Not enough in savings to complete transfer"
         }
         else {
-          this.$store.commit('withdrawSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
-          this.$store.commit('depositChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
+          this.$store.dispatch('withdrawSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
+          this.$store.dispatch('depositChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
           this.messageResult= ""
         }
       }

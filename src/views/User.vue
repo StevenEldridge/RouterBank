@@ -84,7 +84,7 @@ export default Vue.extend({
       if (this.userAccount != null && this.userAccount.mprEnable) {
         const userID = Number.parseInt(this.$route.params.userID)
         const interest = this.userAccount.savingsBalance * this.userAccount.minutePercentageRate / 10
-        this.$store.commit('depositSavings',
+        this.$store.dispatch('depositSavings',
               {userID: userID, amount: (Math.round(interest * 100) / 100)} as savingsAndChecking)
       }
       setTimeout(() => this.calculateMPR(), 5000)

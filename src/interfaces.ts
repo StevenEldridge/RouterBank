@@ -14,7 +14,7 @@ export interface savingsAndChecking {
     amount: number
 }
 
-export interface mprEnablepayload {
+export interface mprEnablePayload {
     userID: number,
     mprEnable: boolean
 }

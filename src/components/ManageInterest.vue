@@ -56,7 +56,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {mprEnablepayload, savingsAndChecking, userAccount} from "@/interfaces";
+import {mprEnablePayload, savingsAndChecking, userAccount} from "@/interfaces";
 
 interface manageInterestData {
   mpr: string,
@@ -120,13 +120,13 @@ export default Vue.extend ({
         return
       }
 
-      this.$store.commit('setMinutePercentageRate',
+      this.$store.dispatch('updateMinutePercentageRate',
             {userID: userID, amount: (amountNum / 100)} as savingsAndChecking)
       if (this.mprEnable === "Enabled") {
-        this.$store.commit('setMPREnable', {userID: userID, mprEnable: true} as mprEnablepayload)
+        this.$store.dispatch('updateMPREnable', {userID: userID, mprEnable: true} as mprEnablePayload)
       }
       else {
-        this.$store.commit('setMPREnable', {userID: userID, mprEnable: false} as mprEnablepayload)
+        this.$store.dispatch('updateMPREnable', {userID: userID, mprEnable: false} as mprEnablePayload)
       }
       this.messageResult = ""
 

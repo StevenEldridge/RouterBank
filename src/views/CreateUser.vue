@@ -154,7 +154,7 @@ export default Vue.extend({
       this.savingsBalance = Number.parseFloat(this.stringSavingsBalance)
       this.checkingBalance = Number.parseFloat(this.stringCheckingBalance)
 
-      this.$store.commit('createUserAccount', {
+      this.$store.dispatch('createUserAccount', {
         userID: this.userID,
         name: this.name,
         username: this.username,

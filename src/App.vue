@@ -14,7 +14,7 @@ export default Vue.extend({
     //
   }),
   beforeMount(): void {
-    this.$store.commit('createUserAccount', {
+    this.$store.dispatch('createUserAccount', {
       userID: 1,
       name: 'Test Account',
       username: 'testAccount',

@@ -102,7 +102,7 @@ export default Vue.extend ({
   },
 
   methods: {
-    // Validates the form and then commits deposits or withdraws to the store
+    // Validates the form and then dispatches deposits or withdraws to the store
     submitForm() {
       const amountNum: number = Number.parseFloat(this.amount)
       const userID: number = Number.parseInt(this.$route.params.userID)
@@ -130,7 +130,7 @@ export default Vue.extend ({
             this.messageResult = "Error: Not enough in savings to withdraw"
           }
           else {
-            this.$store.commit('withdrawSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
+            this.$store.dispatch('withdrawSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
             this.messageResult = ""
           }
         }
@@ -140,7 +140,7 @@ export default Vue.extend ({
             this.messageResult = "Error: Not enough in checking to withdraw"
           }
           else {
-            this.$store.commit('withdrawChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
+            this.$store.dispatch('withdrawChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
             this.messageResult = ""
           }
         }
@@ -148,12 +148,12 @@ export default Vue.extend ({
       else {
         // Deposits into savings
         if (this.account === "Savings") {
-          this.$store.commit('depositSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
+          this.$store.dispatch('depositSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
           this.messageResult = ""
         }
         // Deposits into checking
         else {
-          this.$store.commit('depositChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
+          this.$store.dispatch('depositChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
           this.messageResult = ""
         }
       }
