@@ -6,13 +6,13 @@
       <v-col>
         <v-card outlined>
           <v-card-title>Savings Account</v-card-title>
-          <v-card-subtitle class="text-h4">{{ userAccount.savingsBalance.toFixed(2) + " " + currencyName }}</v-card-subtitle>
+          <v-card-subtitle class="text-h4">{{ bankAccount.savebal.toFixed(2) + " " + currencyName }}</v-card-subtitle>
         </v-card>
       </v-col>
       <v-col>
         <v-card outlined>
           <v-card-title>Minute Percentage Rate (MPR)</v-card-title>
-          <v-card-subtitle class="text-h4">{{ (userAccount.minutePercentageRate * 100).toFixed(2) + "%" }}</v-card-subtitle>
+          <v-card-subtitle class="text-h4">{{ (bankAccount.mpr * 100).toFixed(2) + "%" }}</v-card-subtitle>
         </v-card>
       </v-col>
     </v-row>
@@ -49,6 +49,7 @@
       <p>
         Router Bank values our customers and as such we offer unprecedented interest rates for your savings account.
         We give you full control over setting your interest rate as a testament of our dedication to our customers.
+        Your savings account will only compound while you use our website and enable the MPR.
       </p>
     </v-footer>
   </v-container>
@@ -56,7 +57,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {mprEnablePayload, savingsAndChecking, userAccount} from "@/interfaces";
+import {bankAccount} from "@/interfaces";
 
 interface manageInterestData {
   mpr: string,
@@ -87,8 +88,8 @@ export default Vue.extend ({
   },
 
   computed: {
-    userAccount(): userAccount | null {
-      return this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID))
+    bankAccount(): bankAccount {
+      return this.$store.getters.getBankAccount
     },
     currencyName(): string {
       return this.$store.getters.getCurrencyName
@@ -96,12 +97,18 @@ export default Vue.extend ({
   },
 
   methods: {
-    submitForm() {
-      const amountNum: number = Number.parseFloat(this.mpr)
-      const userID: number = Number.parseInt(this.$route.params.userID)
+    async submitForm(): Promise<void> {
+      const amountNum: number = Number.parseFloat(this.mpr) / 100
+      var enabled: string
+      if (this.mprEnable === "Enabled") {
+        enabled = 'true';
+      }
+      else {
+        enabled = 'false';
+      }
 
       // Ensures user account exists
-      if (this.userAccount == null) {
+      if (this.bankAccount == null) {
         this.messageResult = "Error: User Account does not exist"
         return
       }
@@ -120,23 +127,48 @@ export default Vue.extend ({
         return
       }
 
-      this.$store.dispatch('updateMinutePercentageRate',
-            {userID: userID, amount: (amountNum / 100)} as savingsAndChecking)
-      if (this.mprEnable === "Enabled") {
-        this.$store.dispatch('updateMPREnable', {userID: userID, mprEnable: true} as mprEnablePayload)
+      let fetchResults = fetch (
+        this.$store.getters.getApiBaseUrl + "/" + this.$store.getters.getAccountId + "/updatempr", {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json, plain/text',
+            'Authorization': 'Bearer ' + this.$store.getters.getToken,
+            'amount': amountNum.toString(),
+            'enabled': enabled
+          }
+        }
+      )
+      if (await fetchResults.then(response => {return response.ok})) {
+        fetchResults = fetch (
+          this.$store.getters.getApiBaseUrl + "/" + this.$store.getters.getAccountId + "/bankaccount", {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, plain/text',
+              'Authorization': 'Bearer ' + this.$store.getters.getToken
+            }
+          }
+        )
+        if (await fetchResults.then(response => {return response.ok})) {
+          await this.$store.dispatch('updateBankAccount', await fetchResults.then(response => {
+            return response.json()}).then(data => {return data}))
+          this.messageResult = ""
+        }
+        else {
+          this.messageResult = "ERROR: There was an issue updating your interest rates"
+        }
       }
       else {
-        this.$store.dispatch('updateMPREnable', {userID: userID, mprEnable: false} as mprEnablePayload)
+        this.messageResult = "ERROR: There was an issue updating your interest rates"
       }
-      this.messageResult = ""
-
     }
   },
 
   mounted() {
-    if (this.userAccount != undefined) {
-      this.mpr = (this.userAccount.minutePercentageRate * 100).toString()
-      if (this.userAccount.mprEnable) {
+    if (this.bankAccount != undefined) {
+      this.mpr = (this.bankAccount.mpr * 100).toString()
+      if (this.bankAccount.mpr_enable) {
         this.mprEnable = "Enabled"
       }
       else {

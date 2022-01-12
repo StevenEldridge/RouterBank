@@ -1,23 +1,83 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {mprEnablePayload, userAccount} from '@/interfaces'
-import { savingsAndChecking } from '@/interfaces'
+import {userAccount, bankAccount, transact} from '@/interfaces'
 
 Vue.use(Vuex)
 
-interface stateData {
-  currencyName: string,
-  userAccounts: Array<userAccount>
-}
-interface commitCheckingAndSavings {
-  userAccountsIndex: number,
-  amount: number
-}
-interface commitMPREnable {
-  userAccountsIndex: number,
-  mprEnable: boolean
-}
+export default new Vuex.Store({
 
+  state: {
+    currencyName: "Routez",
+    apiBaseUrl: "https://localhost:7259",
+    token: "",
+    accountId: 0,
+    userAccount: {} as userAccount,
+    bankAccount: {} as bankAccount,
+    transactions: new Array<transact>()
+  },
+
+  mutations: {
+    setToken(store, payload: string): void {
+      store.token = payload
+    },
+    setAccountId(store, payload: number): void {
+      store.accountId = payload
+    },
+    setUserAccount(store, payload: userAccount): void {
+      store.userAccount = payload
+    },
+    setBankAccount(store, payload: bankAccount): void {
+      store.bankAccount = payload
+    },
+    setTransactions(store, payload: transact[]): void {
+      store.transactions = payload
+    }
+  },
+
+  actions: {
+    updateToken(context, payload: string): void {
+      context.commit('setToken', payload)
+    },
+    updateAccountId(context, payload: number): void {
+      context.commit('setAccountId', payload)
+    },
+    updateUserAccount(context, payload: userAccount): void {
+      context.commit('setUserAccount', payload)
+    },
+    updateBankAccount(context, payload: bankAccount): void {
+      context.commit('setBankAccount', payload)
+    },
+    updateTransactions(context, payload: transact[]): void {
+      context.commit('setTransactions', payload)
+    }
+  },
+
+  getters: {
+    getCurrencyName(store): string {
+      return store.currencyName
+    },
+    getApiBaseUrl(store): string {
+      return store.apiBaseUrl
+    },
+    getToken(store): string {
+      return store.token
+    },
+    getAccountId(store): number {
+      return store.accountId
+    },
+    getUserAccount(store): userAccount {
+      return store.userAccount
+    },
+    getBankAccount(store): bankAccount {
+      return store.bankAccount
+    },
+    getTransactions(store): transact[] {
+      return store.transactions
+    }
+  }
+})
+
+/*
 export default new Vuex.Store({
 
   state: {
@@ -135,3 +195,4 @@ export default new Vuex.Store({
     }
   }
 })
+ */

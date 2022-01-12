@@ -1,12 +1,29 @@
 export interface userAccount {
-    userID: number,
     name: string,
     username: string,
-    password: string,
-    savingsBalance: number,
-    checkingBalance: number,
-    minutePercentageRate: number,
-    mprEnable: boolean
+    pass: string,
+    birthdate: string,
+    addr: string,
+    phone: string,
+    snn: string
+}
+
+export interface bankAccount {
+    ussn: string,
+    accountid: number,
+    checkbal: number,
+    savebal: number,
+    mpr: number,
+    mpr_enable: boolean
+}
+
+export interface transact {
+    acntid: number,
+    act: string,
+    amount: number,
+    account: string,
+    newbal: number,
+    tDate: string
 }
 
 export interface savingsAndChecking {

@@ -18,13 +18,14 @@
         <v-list-item
             v-for="item in navDrawerItems"
             :key = item.title
+            @click="item.func"
             link
         >
           <v-list-item-icon>
             <v-icon>{{ item.icon }}</v-icon>
           </v-list-item-icon>
           <v-list-item-content>
-            <v-list-item-title @click="$router.push({name: item.link})">
+            <v-list-item-title>
               {{ item.title }}
             </v-list-item-title>
           </v-list-item-content>
@@ -39,12 +40,12 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {savingsAndChecking, userAccount} from '@/interfaces'
+import {bankAccount, userAccount} from '@/interfaces'
 
 interface drawerItem {
   title: string,
   icon: string,
-  link: string
+  func: any
 }
 
 interface userComponentData {
@@ -58,11 +59,12 @@ export default Vue.extend({
     return {
       openNavDrawer: false,
       navDrawerItems: [
-        {title: 'Account Overview', icon: 'mdi-account', link: 'AccountOverview'},
-        {title: 'Deposit/Withdraw', icon: 'mdi-cash-multiple', link: 'DepositWithdraw'},
-        {title: 'Transfer', icon: 'mdi-cash-fast', link: 'Transfer'},
-        {title: 'Manage Interest', icon: 'mdi-percent', link: 'ManageInterest'},
-        {title: 'Logout', icon: 'mdi-logout', link: 'About'},
+        {title: 'Account Overview', icon: 'mdi-account', func:() => {this.$router.push({name: 'AccountOverview'})}},
+        {title: 'Deposit/Withdraw', icon: 'mdi-cash-multiple', func:() => {this.$router.push({name: 'DepositWithdraw'})}},
+        {title: 'Transfer', icon: 'mdi-cash-fast', func:() => {this.$router.push({name: 'Transfer'})}},
+        {title: 'Manage Interest', icon: 'mdi-percent', func:() => {this.$router.push({name: 'ManageInterest'})}},
+        {title: 'Transaction History', icon: 'mdi-history', func:() => {this.$router.push({name: 'TransactionHistory'})}},
+        {title: 'Logout', icon: 'mdi-logout', func:() => {location.reload()}},
       ]
     }
   },
@@ -71,28 +73,71 @@ export default Vue.extend({
       return this.$store.getters.getCurrencyName
     },
     userBalance(): number {
-      const account: userAccount = this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID))
-      return account.checkingBalance + account.savingsBalance
+      const account: bankAccount = this.bankAccount
+      return account.savebal + account.checkbal
     },
     userAccount(): userAccount | null {
-      return this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID))
+      return this.$store.getters.getUserAccount
     },
+    bankAccount(): bankAccount {
+      return this.$store.getters.getBankAccount
+    }
   },
 
   methods: {
     calculateMPR(): void {
-      if (this.userAccount != null && this.userAccount.mprEnable) {
-        const userID = Number.parseInt(this.$route.params.userID)
-        const interest = this.userAccount.savingsBalance * this.userAccount.minutePercentageRate / 10
-        this.$store.dispatch('depositSavings',
-              {userID: userID, amount: (Math.round(interest * 100) / 100)} as savingsAndChecking)
+      if (this.bankAccount != null && this.bankAccount.mpr_enable) {
+        const interest = this.bankAccount.savebal * this.bankAccount.mpr / 6
+        this.depositApiCall(Math.round(interest * 100) / 100)
       }
-      setTimeout(() => this.calculateMPR(), 5000)
+      setTimeout(() => this.calculateMPR(), 10000)
+    },
+
+    async depositApiCall(amount: number): Promise<void> {
+      let fetchResults = fetch(
+          this.$store.getters.getApiBaseUrl + "/" + this.bankAccount.accountid + "/depositsavings", {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain',
+              'Authorization': 'Bearer ' + this.$store.getters.getToken,
+              'amount': amount.toString()
+            },
+          }
+      )
+      if (await fetchResults.then(response => {
+        return response.ok
+      })) {
+        fetchResults = fetch(
+            this.$store.getters.getApiBaseUrl + "/" + this.bankAccount.accountid + "/bankaccount", {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/plain',
+                'Authorization': 'Bearer ' + this.$store.getters.getToken
+              }
+            }
+        )
+        if (await fetchResults.then(response => {return response.ok})) {
+          await this.$store.dispatch('updateBankAccount', await fetchResults.then(response => {
+            return response.json()}).then(data => {return data}))
+        }
+      }
     }
   },
 
-  mounted() {
-    setTimeout(() => this.calculateMPR(), 5000)
+  beforeMount() {
+    if (this.$store.getters.getAccountId != this.$route.params.userID) {
+      this.$router.replace({ path: `/` })
+    }
+    setTimeout(() => this.calculateMPR(), 10000)
+  },
+  watch: {
+    $route(to, from) {
+      if (this.$store.getters.getAccountId != this.$route.params.userID) {
+        this.$router.replace({ path: `/` })
+      }
+    }
   }
 })
 </script>

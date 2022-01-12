@@ -6,13 +6,13 @@
       <v-col>
         <v-card outlined>
           <v-card-title>Savings Account</v-card-title>
-          <v-card-subtitle class="text-h4">{{ userAccount.savingsBalance.toFixed(2) + " " + currencyName }}</v-card-subtitle>
+          <v-card-subtitle class="text-h4">{{ bankAccount.savebal.toFixed(2) + " " + currencyName }}</v-card-subtitle>
         </v-card>
       </v-col>
       <v-col>
         <v-card outlined>
           <v-card-title>Checking Account</v-card-title>
-          <v-card-subtitle class="text-h4">{{ userAccount.checkingBalance.toFixed(2) + " " + currencyName }}</v-card-subtitle>
+          <v-card-subtitle class="text-h4">{{ bankAccount.checkbal.toFixed(2) + " " + currencyName }}</v-card-subtitle>
         </v-card>
       </v-col>
     </v-row>
@@ -63,7 +63,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {savingsAndChecking, userAccount} from "@/interfaces";
+import {bankAccount} from "@/interfaces";
 
 interface depositWithdrawData {
   action: "Deposit" | "Withdraw"
@@ -93,8 +93,8 @@ export default Vue.extend ({
   },
 
   computed: {
-    userAccount(): userAccount | null {
-      return this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID))
+    bankAccount(): bankAccount {
+      return this.$store.getters.getBankAccount
     },
     currencyName(): string {
       return this.$store.getters.getCurrencyName
@@ -102,13 +102,12 @@ export default Vue.extend ({
   },
 
   methods: {
-    // Validates the form and then dispatches deposits or withdraws to the store
-    submitForm() {
+    // Validates the form and then makes an API request for a deposit or withdraw
+    async submitForm(): Promise<void> {
       const amountNum: number = Number.parseFloat(this.amount)
-      const userID: number = Number.parseInt(this.$route.params.userID)
 
       // Ensures user account exists
-      if (this.userAccount == null) {
+      if (this.bankAccount == null) {
         this.messageResult = "Error: User Account does not exist"
         return
       }
@@ -126,35 +125,66 @@ export default Vue.extend ({
       if (this.action === "Withdraw") {
         // Withdraws from savings if there is enough in savings
         if (this.account === "Savings") {
-          if (this.userAccount.savingsBalance < amountNum) {
+          if (this.bankAccount.savebal < amountNum) {
             this.messageResult = "Error: Not enough in savings to withdraw"
           }
           else {
-            this.$store.dispatch('withdrawSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
-            this.messageResult = ""
+            await this.depositWithdrawApiCall("withdrawsavings", amountNum)
           }
         }
         // Withdraws from checking if there is enough in checking
         else {
-          if (this.userAccount.checkingBalance < amountNum) {
+          if (this.bankAccount.checkbal < amountNum) {
             this.messageResult = "Error: Not enough in checking to withdraw"
           }
           else {
-            this.$store.dispatch('withdrawChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
-            this.messageResult = ""
+            await this.depositWithdrawApiCall("withdrawchecking", amountNum)
           }
         }
       }
       else {
         // Deposits into savings
         if (this.account === "Savings") {
-          this.$store.dispatch('depositSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
-          this.messageResult = ""
+          await this.depositWithdrawApiCall("depositsavings", amountNum)
         }
         // Deposits into checking
         else {
-          this.$store.dispatch('depositChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
+          await this.depositWithdrawApiCall("depositchecking", amountNum)
+        }
+      }
+    },
+    async depositWithdrawApiCall(action: string, amount: number): Promise<void> {
+      let fetchResults = fetch(
+          this.$store.getters.getApiBaseUrl + "/" + this.bankAccount.accountid + "/" + action, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain',
+              'Authorization': 'Bearer ' + this.$store.getters.getToken,
+              'amount': amount.toString()
+            },
+          }
+      )
+      if (await fetchResults.then(response => {
+        return response.ok
+      })) {
+        fetchResults = fetch(
+            this.$store.getters.getApiBaseUrl + "/" + this.bankAccount.accountid + "/bankaccount", {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/plain',
+                'Authorization': 'Bearer ' + this.$store.getters.getToken
+              }
+            }
+        )
+        if (await fetchResults.then(response => {return response.ok})) {
+          await this.$store.dispatch('updateBankAccount', await fetchResults.then(response => {
+            return response.json()}).then(data => {return data}))
           this.messageResult = ""
+        }
+        else {
+          this.messageResult = "ERROR: There was an error processing your transaction"
         }
       }
     }

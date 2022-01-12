@@ -6,13 +6,13 @@
       <v-col>
         <v-card outlined>
           <v-card-title>Savings Account</v-card-title>
-          <v-card-subtitle class="text-h4">{{ userAccount.savingsBalance.toFixed(2) + " " + currencyName }}</v-card-subtitle>
+          <v-card-subtitle class="text-h4">{{ bankAccount.savebal.toFixed(2) + " " + currencyName }}</v-card-subtitle>
         </v-card>
       </v-col>
       <v-col>
         <v-card outlined>
           <v-card-title>Checking Account</v-card-title>
-          <v-card-subtitle class="text-h4">{{ userAccount.checkingBalance.toFixed(2) + " " + currencyName }}</v-card-subtitle>
+          <v-card-subtitle class="text-h4">{{ bankAccount.checkbal.toFixed(2) + " " + currencyName }}</v-card-subtitle>
         </v-card>
       </v-col>
     </v-row>
@@ -59,7 +59,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import {savingsAndChecking, userAccount} from "@/interfaces";
+import {bankAccount} from "@/interfaces";
 
 interface transferData {
   buttonDirection: "Left" | "Right"
@@ -87,8 +87,8 @@ export default Vue.extend ({
   },
 
   computed: {
-    userAccount(): userAccount | null {
-      return this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID))
+    bankAccount(): bankAccount {
+      return this.$store.getters.getBankAccount
     },
     currencyName(): string {
       return this.$store.getters.getCurrencyName
@@ -103,12 +103,11 @@ export default Vue.extend ({
         this.buttonDirection = "Left"
       }
     },
-    submitForm(): void {
+    async submitForm(): Promise<void> {
       const amountNum: number = Number.parseFloat(this.amount)
-      const userID: number = Number.parseInt(this.$route.params.userID)
 
       // Ensures user account exists
-      if (this.userAccount == null) {
+      if (this.bankAccount == null) {
         this.messageResult = "Error: User Account does not exist"
         return
       }
@@ -124,26 +123,52 @@ export default Vue.extend ({
       }
 
       // Transfers money from checking to savings
-      if (this.buttonDirection === "Left") {
-        if (this.userAccount.checkingBalance < amountNum ) {
-          this.messageResult = "Error: Not enough in checking to complete transfer"
-        }
-        else {
-          this.$store.dispatch('withdrawChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
-          this.$store.dispatch('depositSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
-          this.messageResult= ""
-        }
+      if (this.buttonDirection === "Left" && this.bankAccount.checkbal >= amountNum) {
+        await this.transferApiCall("savings", amountNum)
       }
       // Transfers money from savings to checking
+      else if (this.buttonDirection === "Right" && this.bankAccount.savebal >= amountNum) {
+        await this.transferApiCall("checking", amountNum)
+      }
       else {
-        if (this.userAccount.savingsBalance < amountNum ) {
-          this.messageResult = "Error: Not enough in savings to complete transfer"
+        this.messageResult = "Error: You do not have enough funds for the transfer"
+      }
+    },
+    async transferApiCall(action: string, amount: number): Promise<void> {
+      let fetchResults = fetch (
+          this.$store.getters.getApiBaseUrl + "/" + this.bankAccount.accountid + "/transfer", {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain',
+              'Authorization': 'Bearer ' + this.$store.getters.getToken,
+              'amount': amount.toString(),
+              'transferto': action
+            }
+          }
+      )
+      if (await fetchResults.then(response => {return response.ok})) {
+        fetchResults = fetch (
+            this.$store.getters.getApiBaseUrl + "/" + this.bankAccount.accountid + "/bankaccount", {
+              method: 'GET',
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json, text/plain',
+                'Authorization': 'Bearer ' + this.$store.getters.getToken
+              }
+            }
+        )
+        if (await fetchResults.then(response => {return response.ok})) {
+          await this.$store.dispatch('updateBankAccount', await fetchResults.then(response => {
+            return response.json()}).then(data => {return data}))
+          this.messageResult = ""
         }
         else {
-          this.$store.dispatch('withdrawSavings', {userID: userID, amount: amountNum} as savingsAndChecking)
-          this.$store.dispatch('depositChecking', {userID: userID, amount: amountNum} as savingsAndChecking)
-          this.messageResult= ""
+          this.messageResult = "ERROR: There was an issue submitting your transfer request"
         }
+      }
+      else {
+        this.messageResult = "ERROR: There was an issue submitting your transfer request"
       }
     }
   }

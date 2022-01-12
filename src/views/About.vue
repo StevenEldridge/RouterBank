@@ -8,14 +8,17 @@
     </v-row>
     <v-row justify="center">
       <p class="ma-5">
-        This is a demo application that uses Vue, Vuex, Vuetify, Vue Router, and typescript.
-        You can use the navigation to the left to traverse Router Bank and manage all of your banking needs.
-        Router bank solely uses our custom and totally useless currency {{ currencyName }}
+        Router bank solely uses our custom and totally useless currency {{ currencyName }}.
+        This is a demo application that uses Vue, Vuex, Vuetify, Vue Router, and Typescript for the front end.
+        Router Bank also uses a custom built .net core API written in C# that connects to an SQL database to store
+        all user data. Login or create a new user account to get started.
+
+
       </p>
     </v-row>
     <v-row justify="space-around">
-      <v-btn x-large color="primary" @click="$router.push('login')">Login</v-btn>
-      <v-btn x-large color="primary" @click="$router.push('createuser')">Create Account</v-btn>
+      <v-btn x-large color="primary" @click="$router.replace('login')">Login</v-btn>
+      <v-btn x-large color="primary" @click="$router.replace('createuser')">Create Account</v-btn>
     </v-row>
   </v-container>
 </template>

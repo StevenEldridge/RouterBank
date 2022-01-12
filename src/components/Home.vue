@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1  class="mt-10">Welcome {{ userName }}, to Router Bank!</h1>
+    <h1  class="mt-10">Welcome {{ userAccount.name }}, to Router Bank!</h1>
     <h2 class="mt-5">A bank to store all of your fake {{ currencyName }} currency!</h2>
     <p class="mt-5">
       This is a demo application that uses Vue, Vuex, Vuetify, Vue Router, and typescript.
@@ -41,6 +41,14 @@
       </v-list-item>
       <v-list-item two-line>
         <v-list-item-content>
+          <v-list-item-title>Transaction History</v-list-item-title>
+          <v-list-item-subtitle>
+            Allows you to view your transaction history
+          </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+      <v-list-item two-line>
+        <v-list-item-content>
           <v-list-item-title>Logout</v-list-item-title>
           <v-list-item-subtitle>Logs out of your account and redirects to the about page</v-list-item-subtitle>
         </v-list-item-content>
@@ -51,6 +59,7 @@
 
 <script lang="ts">
 import Vue from "vue";
+import {userAccount} from "@/interfaces";
 
 export default Vue.extend ({
   name: "Home",
@@ -58,8 +67,8 @@ export default Vue.extend ({
     currencyName(): string {
       return this.$store.getters.getCurrencyName
     },
-    userName(): string {
-      return this.$store.getters.getUserAccount(Number.parseInt(this.$route.params.userID)).name
+    userAccount(): userAccount {
+      return this.$store.getters.getUserAccount
     }
   }
 })

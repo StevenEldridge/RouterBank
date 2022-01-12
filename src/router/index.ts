@@ -9,6 +9,7 @@ import AccountOverview from "@/components/AccountOverview.vue";
 import DepositWithdraw from "@/components/DepositWithdraw.vue";
 import Transfer from "@/components/Transfer.vue";
 import ManageInterest from "@/components/ManageInterest.vue";
+import TransactionHistory from "@/components/TransactionHistory.vue";
 
 Vue.use(VueRouter)
 
@@ -37,7 +38,8 @@ const routes: Array<RouteConfig> = [
       { path: 'accountoverview', name: 'AccountOverview', component: AccountOverview },
       { path: 'depositwithdraw', name: 'DepositWithdraw', component: DepositWithdraw },
       { path: 'transfer', name: 'Transfer', component: Transfer },
-      { path: 'manageinterest', name: 'ManageInterest', component: ManageInterest }
+      { path: 'manageinterest', name: 'ManageInterest', component: ManageInterest },
+      { path: 'transactionhistory', name: 'TransactionHistory', component: TransactionHistory}
     ]
   },
 ]

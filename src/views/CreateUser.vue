@@ -1,6 +1,7 @@
 <template>
-  <v-container>
-    <v-row justify="center" class="mt-16">
+  <div>
+  <v-container style="margin-bottom: 128px;">
+    <v-row justify="center" class="mt-4">
       <h1>Create New Account</h1>
     </v-row>
     <v-row justify="center">
@@ -32,11 +33,55 @@
     </v-row>
     <v-row justify="center">
       <v-text-field
-          v-model="password"
-          label="Unsecured Password:"
-          hint="NOTE: THERE IS NO ACCOUNT PROTECTION. DO NOT ENTER A REAL PASSWORD"
+          v-model="pass"
+          label="Password:"
+          hint="NOTE: DO NOT USE A REAL PASSWORD"
           :rules="[function (value) { return !!value || 'Required'; }]"
           prepend-inner-icon="mdi-lock"
+          style="font-size: 1.3em"
+          outlined
+      ></v-text-field>
+    </v-row>
+    <v-row justify="center">
+      <v-text-field
+          v-model="birthdate"
+          label="Date of Birth:"
+          hint="NOTE: DO NOT ENTER YOUR REAL DATE OF BIRTH"
+          :rules="[function (value) { return !!value || 'Required'; }]"
+          prepend-inner-icon="mdi-cake"
+          style="font-size: 1.3em"
+          outlined
+      ></v-text-field>
+    </v-row>
+    <v-row justify="center">
+      <v-text-field
+          v-model="addr"
+          label="Address:"
+          hint="NOTE: DO NOT ENTER YOUR REAL HOME ADDRESS"
+          :rules="[function (value) { return !!value || 'Required'; }]"
+          prepend-inner-icon="mdi-map-marker"
+          style="font-size: 1.3em"
+          outlined
+      ></v-text-field>
+    </v-row>
+    <v-row justify="center">
+      <v-text-field
+          v-model="phone"
+          label="Phone Number:"
+          hint="NOTE: DO NOT USE YOUR REAL PHONE NUMBER"
+          :rules="amountFieldRules"
+          prepend-inner-icon="mdi-cellphone"
+          style="font-size: 1.3em"
+          outlined
+      ></v-text-field>
+    </v-row>
+    <v-row justify="center">
+      <v-text-field
+          v-model="snn"
+          label="Social Security Number:"
+          hint="NOTE: DO NOT USE YOUR REAL SSN NUMBER"
+          :rules="amountFieldRules"
+          prepend-inner-icon="mdi-account-box"
           style="font-size: 1.3em"
           outlined
       ></v-text-field>
@@ -75,21 +120,21 @@
     <v-row justify="center">
       <h3 class="red--text text--darken-2 mt-4" v-if="messageResult">{{ messageResult }}</h3>
     </v-row>
-    <v-footer absolute color="red" class="lighten-3">
-      <p><b>
-        <u>WARNING</u>: There is no account security on Router Bank. This is a demo application and as such account security
-        will not be implemented. You shouldn't have to worry as Router Bank does not use anything real. Please DO NOT
-        USE a real username or password when making an account.
-      </b></p>
-    </v-footer>
   </v-container>
+  <v-footer fixed color="red" class="lighten-3">
+    <p><b>
+      <u>WARNING</u>: Router Bank is just a demo application. DO NOT enter real information about yourself such as
+      a real password, date of birth, address, phone number, or social security number. Please USE FAKE informaiton.
+    </b></p>
+  </v-footer>
+  </div>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
-import {userAccount} from "@/interfaces";
+import {userAccount, bankAccount} from "@/interfaces";
 
-interface createUserData extends userAccount {
+interface createUserData extends userAccount, bankAccount {
   messageResult: string
   amountFieldRules: any[]
   stringSavingsBalance: string
@@ -100,16 +145,21 @@ export default Vue.extend({
   name: "CreateUser",
   data(): createUserData {
     return {
-      userID: 0,
       name: "",
       username: "",
-      password: "",
+      pass: "",
+      birthdate: "",
+      addr: "",
+      phone: "",
+      snn: "",
+      ussn: "",
+      accountid: 0,
       stringSavingsBalance: "",
-      savingsBalance: 0,
+      savebal: 0,
       stringCheckingBalance: "",
-      checkingBalance: 0,
-      minutePercentageRate: 0.10,
-      mprEnable: false,
+      checkbal: 0,
+      mpr: 0.05,
+      mpr_enable: false,
       messageResult: "",
       amountFieldRules: [
         function (value: string) {
@@ -123,7 +173,7 @@ export default Vue.extend({
   },
 
   methods: {
-    createAccount(): void {
+    async createAccount(): Promise<void> {
       // Ensures the user entered their name
       if (this.name === "") {
         this.messageResult = "Error: You need to provide your name"
@@ -135,8 +185,28 @@ export default Vue.extend({
         return
       }
       // Ensures the user entered a password
-      if (this.password === "") {
-        this.messageResult = "Error: You need to provide a password even though there is no account security lol"
+      if (this.pass === "") {
+        this.messageResult = "Error: You need to provide a password"
+        return
+      }
+      // Ensures the user entered their date of birth
+      if (this.birthdate === "") {
+        this.messageResult = "Error: You need to provide a date of birth"
+        return
+      }
+      // Ensures the user entered their address
+      if (this.addr === "") {
+        this.messageResult = "Error: You need to provide an address"
+        return
+      }
+      // Ensures the user entered a phone number
+      if (this.phone === "") {
+        this.messageResult = "Error: You need to provide a phone number"
+        return
+      }
+      // Ensures the user entered a ssn
+      if (this.snn === "") {
+        this.messageResult = "Error: You need to provide a social security number"
         return
       }
       // Ensures an amount has been specified
@@ -146,26 +216,159 @@ export default Vue.extend({
       }
       // Ensures the amount is a proper number
       else if (!/^[0-9]*\.?[0-9]+$/.test(this.stringSavingsBalance) ||
-            !/^[0-9]*\.?[0-9]+$/.test(this.stringCheckingBalance)) {
+          !/^[0-9]*\.?[0-9]+$/.test(this.stringCheckingBalance)) {
         this.messageResult = "Error: You did not enter a valid number for either your savings or checking balance"
         return
       }
+      // Ensures the phone number is a valid number
+      else if (!/^[0-9]*\.?[0-9]+$/.test(this.phone)) {
+        this.messageResult = "Error: You did not enter a valid phone number"
+        return
+      }
+      // Ensures the snn is a valid ssn number
+      else if (!/^[0-9]*\.?[0-9]+$/.test(this.snn)) {
+        this.messageResult = "Error: You did not enter a valid social security number"
+        return
+      }
 
-      this.savingsBalance = Number.parseFloat(this.stringSavingsBalance)
-      this.checkingBalance = Number.parseFloat(this.stringCheckingBalance)
+      this.savebal = Number.parseFloat(this.stringSavingsBalance)
+      this.checkbal = Number.parseFloat(this.stringCheckingBalance)
+      let hashedPass : string = await this.hashPassword(this.pass)
 
-      this.$store.dispatch('createUserAccount', {
-        userID: this.userID,
-        name: this.name,
-        username: this.username,
-        password: this.password,
-        savingsBalance: this.savingsBalance,
-        checkingBalance: this.checkingBalance,
-        minutePercentageRate: this.minutePercentageRate,
-        mprEnable: this.mprEnable
-      } as userAccount)
+      let responseUser
+      let responseBank
+      let responseBanksOwned
+      let responseGetUser
+      let responseGetBank
 
-      this.$router.push({ path: `/user/${this.$store.getters.getUserAccountByUsername(this.username).userID}` })
+      // Calls the API and creates a user account
+      responseUser = fetch(
+          this.apiBaseUrl + "/createuseraccount", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain'
+            },
+            body: JSON.stringify({
+              Name: this.name, Username: this.username, Pass: hashedPass,
+              Birthdate: this.birthdate, Addr: this.addr, Phone: this.phone, Snn: this.snn
+            })
+          }
+      )
+      if (await responseUser.then(response => {
+        return response.ok
+      })) {
+        await this.$store.dispatch('updateToken', await responseUser.then(
+            response => {return response.json()}).then(data => {return data}))
+      } else {
+        this.messageResult = "ERROR: There was an issue creating the user account"
+        return
+      }
+
+      // Calls the API and creates a bank account
+      responseBank = fetch(
+          this.apiBaseUrl + "/createbankaccount", {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain',
+              'Authorization': 'Bearer ' + this.token
+            },
+            body: JSON.stringify({
+              Ussn: this.snn, Accountid: this.accountid, Checkbal: this.checkbal,
+              Savebal: this.savebal, Mpr: this.mpr, Mpr_enable: this.mpr_enable
+            })
+          }
+      )
+      if (await responseBank.then(response => {
+        return response.ok
+      })) {
+        await this.$store.dispatch('updateToken', await responseBank.then(
+            response => {return response.json()}).then(data => {return data}))
+      } else {
+        this.messageResult = "ERROR: There was an issue creating the bank account"
+        return
+      }
+
+
+      //Calls the API and gets the first account a user owns
+      responseBanksOwned = fetch(
+        this.apiBaseUrl + "/bankaccountsowned", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json, text/plain',
+            'Authorization': 'Bearer ' + this.token
+          }
+        }
+      )
+      if (await responseBanksOwned.then(response => {
+        return response.ok
+      })) {
+        await this.$store.dispatch('updateAccountId', (await responseBanksOwned.then(
+            response => {return response.json()}).then(data => {return data}))[0])
+
+      } else {
+        this.messageResult = "ERROR: There was an issue finding your bank account"
+        return
+      }
+
+      //Calls the API and gets the user's user account information
+      responseGetUser = fetch(
+          this.$store.getters.getApiBaseUrl + "/" + this.$store.getters.getAccountId + "/useraccount", {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain',
+              'Authorization': 'Bearer ' + this.$store.getters.getToken
+            }
+          }
+      )
+      if (await responseGetUser.then(response => {
+        return response.ok
+      })) {
+          await this.$store.dispatch('updateUserAccount', await responseGetUser.then(
+              response => {return response.json()}).then(data => {return data}))
+      } else {
+        this.messageResult = "ERROR: There was an issue getting your user account information"
+        return
+      }
+
+      // Calls theAPI and gets the user's bank account information
+      responseGetBank = fetch(
+          this.$store.getters.getApiBaseUrl + "/" + this.$store.getters.getAccountId + "/bankaccount", {
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'Accept': 'application/json, text/plain',
+              'Authorization': 'Bearer ' + this.$store.getters.getToken
+            }
+          }
+      )
+      if (await responseGetBank.then(response => {
+        return response.ok
+      })) {
+        await this.$store.dispatch('updateBankAccount', await responseGetBank.then(
+            response => {return response.json()}).then(data => {return data}))
+        await this.$router.push({ path: `/user/${this.$store.getters.getAccountId}` })
+      } else {
+        this.messageResult = "ERROR: There was an issue getting your user account information"
+        return
+      }
+    },
+    async hashPassword(password: string) {
+      const utf8 = new TextEncoder().encode(password)
+      const hashedBuff = await crypto.subtle.digest('SHA-256', utf8)
+      const hashedArray = Array.from(new Uint8Array(hashedBuff))
+      return hashedArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+  },
+  computed: {
+    token(): string {
+      return this.$store.getters.getToken
+    },
+    apiBaseUrl(): string {
+      return this.$store.getters.getApiBaseUrl
     }
   }
 })
