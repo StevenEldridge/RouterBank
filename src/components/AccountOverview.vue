@@ -3,13 +3,13 @@
     <h1>Account Overview</h1>
     <h2 class="mt-5">Account Balances</h2>
     <v-row class="mt-1">
-      <v-col>
+      <v-col style="min-width: 360px">
         <v-card outlined>
           <v-card-title>Savings Account</v-card-title>
           <v-card-subtitle class="text-h4">{{ bankAccount.savebal.toFixed(2) + " " + currencyName }}</v-card-subtitle>
         </v-card>
       </v-col>
-      <v-col>
+      <v-col style="min-width: 360px">
         <v-card outlined>
           <v-card-title>Checking Account</v-card-title>
           <v-card-subtitle class="text-h4">{{ bankAccount.checkbal.toFixed(2) + " " + currencyName }}</v-card-subtitle>

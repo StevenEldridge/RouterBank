@@ -1,15 +1,15 @@
 <template>
-  <v-container>
+  <v-container id="container">
     <h1>Manage Interest</h1>
     <h2 class="mt-5">Account Information</h2>
     <v-row class="mt-1">
-      <v-col>
+      <v-col style="min-width: 360px">
         <v-card outlined>
           <v-card-title>Savings Account</v-card-title>
           <v-card-subtitle class="text-h4">{{ bankAccount.savebal.toFixed(2) + " " + currencyName }}</v-card-subtitle>
         </v-card>
       </v-col>
-      <v-col>
+      <v-col style="min-width: 360px">
         <v-card outlined>
           <v-card-title>Minute Percentage Rate (MPR)</v-card-title>
           <v-card-subtitle class="text-h4">{{ (bankAccount.mpr * 100).toFixed(2) + "%" }}</v-card-subtitle>
@@ -180,5 +180,14 @@ export default Vue.extend ({
 </script>
 
 <style scoped>
-
+@media (min-width: 601px) {
+  #container {
+    margin-bottom: 160px;
+  }
+}
+@media (max-width: 600px) {
+  #container {
+    margin-bottom: 208px;
+  }
+}
 </style>

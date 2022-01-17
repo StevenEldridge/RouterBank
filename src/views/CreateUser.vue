@@ -1,6 +1,6 @@
 <template>
   <div>
-  <v-container style="margin-bottom: 128px;">
+  <v-container id="container">
     <v-row justify="center" class="mt-4">
       <h1>Create New Account</h1>
     </v-row>
@@ -124,7 +124,7 @@
   <v-footer fixed color="red" class="lighten-3">
     <p><b>
       <u>WARNING</u>: Router Bank is just a demo application. DO NOT enter real information about yourself such as
-      a real password, date of birth, address, phone number, or social security number. Please USE FAKE informaiton.
+      a real password, date of birth, address, phone number, or social security number. Please USE FAKE information.
     </b></p>
   </v-footer>
   </div>
@@ -375,5 +375,14 @@ export default Vue.extend({
 </script>
 
 <style scoped>
-
+@media (min-width: 601px) {
+  #container {
+    margin-bottom: 128px;
+  }
+}
+@media (max-width: 600px) {
+  #container {
+    margin-bottom: 180px;
+  }
+}
 </style>
